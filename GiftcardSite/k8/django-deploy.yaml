@@ -20,8 +20,7 @@ spec:
           ports:
             - containerPort: 8000
           env:
-            - name: MYSQL_ROOT_PASSWORD
-              value: thisisatestthing. 
+           
 
             - name: MYSQL_DB
               value: GiftcardSiteDB
@@ -32,12 +31,21 @@ spec:
             - name: ALLOWED_HOSTS
               value: "*,"
 
+          envFrom:
+            - secretRef:
+                name: mysql
+
+            - secretRef:
+                name: django
+
           volumeMounts:
             - name: mysql-volume-mount
               mountPath: /var/lib/busybox
 
             - name: static-data-volume-mount
               mountPath: /vol/static
+
+
 
       volumes:
         - name: mysql-volume-mount
