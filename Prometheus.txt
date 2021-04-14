@@ -1,0 +1,39 @@
+1. In views.py I commented out: 
+    if pword not in graphs.keys():
+                graphs[pword] = Counter(f'counter_{pword}', 'The total number of '\
+                + f'times {pword} was used')
+            graphs[pword].inc()
+    This would save the user passwords for scarping which would not be a good idea.
+
+2. In views.py I added:
+    graphs['404_counter'] = Counter('python_request_404_returned', 'The total number'\
+    + ' of 404 reponses returned.')
+
+    I also added graphs['404_counter'].inc() whenever I saw return HttpResponse("ERROR: 404 Not Found.") or something similar
+
+3. To install Prometheus:
+        brew install helm
+        helm repo add stable https://charts.helm.sh/stable
+        helm repo update
+        helm install my-prometheus stable/prometheus
+    
+    To connect to Prometheus:
+        export POD_NAME=$(kubectl get pods --namespace default -l "app=prometheus,component=server" -o jsonpath="{.items[0].metadata.name}")
+        kubectl --namespace default port-forward $POD_NAME 9090
+        You can then go to localhost:9090 in browser and see that no data is being collected from the GiftcardSite
+
+    Add a scrape_config to GiftcardSite:
+        KUBE_EDITOR="nano" kubectl edit configmap my-prometheus-server
+        Add:
+         - job_name: giftcardsite
+           scrape_interval: 15s
+           scheme: http
+           static_configs:
+           - targets:
+            - proxy-service:8080
+           metrics_path: '/metrics'
+           (added under scrape_config)
+
+    If you go to the localhost:9090 under the graph tab and type in python_request_404_returned_total you'll be able to see a historical view of the counter
+
+    I also included the prometheus.yaml file
