@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: seed-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: mysql-container
+        image: nyuappsec/assign3-db:v0
+        command: ["/bin/sh"]
+        args: ["-c", "mysql --local-infile -u root --password=$(MYSQL_ROOT_PASSWORD) -h $(MYSQL_HOST) $(MYSQL_DATABASE) < seed.sql"]
+
+        env:
+        - name: MYSQL_DATABASE
+          value: GiftcardSiteDB
+
+        - name: MYSQL_HOST
+          value: mysql-service
+
+        envFrom:
+        - secretRef:
+            name: mysql
+
+      restartPolicy: Never
+  backoffLimit: 4

@@ -1,0 +1,26 @@
+In the Dockerfile I got rid of:
+    COPY ./setup.sql /docker-entrypoint-initdb.d/setup.sql 
+and added:
+    COPY ./setup.sql /setup.sql
+    COPY ./seed.sql /seed.sql
+This changed the way the database migration and seeding worked since the setup.sql file will not be executed automatically on image build since it is no longer stored in the initdb.d file.
+I then deleted the lines that seeded the database from setup.sql and created a new file called seed.sql.
+
+I created two jobs. jobSeeder.sql executes seed.sql. jobMigration.yaml executes setup.sql.
+
+To make sure it worked I removed the pods. I followed the instrustions on the FAQ page and then rebuilt everything.
+    docker build -t nyuappsec/assign3:v0 .
+    docker build -t nyuappsec/assign3-proxy:v0 proxy/
+	docker build -t nyuappsec/assign3-db:v0 db/
+
+	kubectl apply -f db/k8
+	kubectl apply -f GiftcardSite/k8
+	kubectl apply -f proxy/k8
+
+I connected to the database using the command on the FAQ page.
+    kubectl exec --stdin --tty <pod_name> -- bash
+    mysql -u root --password=$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE
+    show tables;
+
+And then ran kubectl apply -f jobMigration.yaml and kubectl apply -f jobSeeder.yaml 
+

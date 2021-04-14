@@ -16,12 +16,13 @@ spec:
       containers:
         - name: mysql-container
           image: nyuappsec/assign3-db:v0
+
           env:
 
             - name: MYSQL_DATABASE
               value: GiftcardSiteDB
 
-           envFrom:
+          envFrom:
             - secretRef:
                 name: mysql
 
